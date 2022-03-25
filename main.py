@@ -1,8 +1,13 @@
+"""
+TODO:
+    [ ] Interact with API
+        [ ] Investigate Facebook API
+        [ ] Investigate Discord API
+    [ ] create "calendar-to-post" pipeline
+"""
+
+
 from __future__ import print_function
-
-# Important variables that are private
-from var import *
-
 
 import datetime
 import os.path
@@ -13,6 +18,10 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+# Important variables that are private
+from var import *
+# `var` file contains the following variables:
+#   BKB_CAL_ID [string] -> Identifying string for a particular calendar 
 
 # If modifying these scopes, delete the file token.json.
 
@@ -62,6 +71,26 @@ def Get_2w_google_api():
     except HttpError as error:
         print('An error occurred: %s' % error)
         return None
+
+def send_to_facebook(events: dict):
+    """
+        Interacts with the Facebook API to post an anouncment from the google events dictonary.
+
+        Parameters:
+            events [dict]: a dictonary containing all relevant events for upcoming week
+    """
+    pass
+
+def send_to_discord(events: dict):
+    """
+        Interacts with the discord API to post an anouncment from the google events dictonary.
+        This will be done with a discord bot.
+
+        Parameters:
+            events [dict]: a dictonary containing all relevant events for upcoming week
+    """
+    pass
+
 
 def main():
     pass
