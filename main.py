@@ -72,28 +72,73 @@ def Get_2w_google_api():
         print('An error occurred: %s' % error)
         return None
 
-def send_to_facebook(events: dict):
-    """
-        Interacts with the Facebook API to post an anouncment from the google events dictonary.
+def send_to_facebook(events: dict) -> Exception | None:
+    if "facebook_client" not in globals():
+        print("Client has not been inisiated")
+        return NameError("func 'send_to_facebook': 'facebook_client' does not exist.")
 
-        Parameters:
-            events [dict]: a dictonary containing all relevant events for upcoming week
+    page_id_1 = 123456789 # wrong id, need to find right one
+    facebook_access_token_1 = 'paste-your-page-access-token-here' # wrong token, need to find right one
+    
+    msg = message_generator(events=events)
+
+    post_url = 'https://graph.facebook.com/{}/feed'.format(page_id_1)
+    payload = {
+    'message': msg,
+    'access_token': facebook_access_token_1
+    }
+    r = requests.post(post_url, data=payload)
+    print(r.text)
+
+def send_to_discord(events: dict) -> Exception | None:
     """
+        events er en dictonary med alle relevante envents for den kommende uke[^1]
+
+        [^1] kommende uke er 7 dager etter den dagen hvor programmet hentet eventer.
+    """
+    
+    if "discord_client" not in globals():
+        print("Client has not been inisiated")
+        return NameError("func 'send_to_discord': 'discord_client' does not exist.")
+    # lim inn kode for å sende en str til "annonser", pass på formatering og at det er på riktig kanal
+    # IKKE RAISE ERROR! Programmet må kjøre kontinuelig heletiden. Heller returner en Error isteded.
     pass
-
-def send_to_discord(events: dict):
-    """
-        Interacts with the discord API to post an anouncment from the google events dictonary.
-        This will be done with a discord bot.
-
-        Parameters:
-            events [dict]: a dictonary containing all relevant events for upcoming week
-    """
-    pass
-
 
 def main():
     pass
 
+def message_generator(events: dict):
+    """
+        Generates a string meant to be sendt to end-clients.
+    """
+    pass
+
+
+
+def create_contact() -> Exception | None:
+    """
+        Creates the nessesary connections to services.
+        services:
+            - Google calendar API
+            - Facebook Graph API (muligens trenger ikke?)
+            - Discord API
+    """
+    global discord_client, facebook_client, google_calendar_client
+
+    discord_client, facebook_client, google_calendar_client = discord.Client(), "", build('calendar', 'v3', credentials=creds)
+
+def time_diff(date1: datetime.datetime, date2: datetime.datetime) -> Exception | datetime.timedelta:
+    diff = date2 - date1
+
+    if datetime.timedelta() < diff < datetime.timedelta(hour = 24):
+        return diff
+    elif diff < datetime.timedelta():
+        return datetime.timedelta()
+    elif diff > datetime.timedelta(days=1):
+        return datetime.timedelta(days=1)
+    else:
+        return ValueError("The difference is not messurable.")
+
 if __name__ == "__main__":
-    main()
+    create_contact()
+    send_to_discord({})
