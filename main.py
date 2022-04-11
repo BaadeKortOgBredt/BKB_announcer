@@ -12,11 +12,22 @@ from __future__ import print_function
 import datetime
 import os.path
 
+# = Google API =
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+# = Discord API =
+
+import discord
+
+# = Facebook API =
+
+import requests
+
 
 # Important variables that are private
 from var import *
@@ -72,7 +83,7 @@ def Get_2w_google_api():
         print('An error occurred: %s' % error)
         return None
 
-def send_to_facebook(events: dict) -> Exception | None:
+def send_to_facebook(events: list[dict]) -> Exception | None:
     if "facebook_client" not in globals():
         print("Client has not been inisiated")
         return NameError("func 'send_to_facebook': 'facebook_client' does not exist.")
@@ -80,7 +91,7 @@ def send_to_facebook(events: dict) -> Exception | None:
     page_id_1 = 123456789 # wrong id, need to find right one
     facebook_access_token_1 = 'paste-your-page-access-token-here' # wrong token, need to find right one
     
-    msg = message_generator(events=events)
+    msg: list[str] = message_generator(events=events)
 
     post_url = 'https://graph.facebook.com/{}/feed'.format(page_id_1)
     payload = {
@@ -90,7 +101,9 @@ def send_to_facebook(events: dict) -> Exception | None:
     r = requests.post(post_url, data=payload)
     print(r.text)
 
-def send_to_discord(events: dict) -> Exception | None:
+    return None
+
+def send_to_discord(events: list[dict]) -> Exception | None:
     """
         events er en dictonary med alle relevante envents for den kommende uke[^1]
 
@@ -107,11 +120,27 @@ def send_to_discord(events: dict) -> Exception | None:
 def main():
     pass
 
-def message_generator(events: dict):
+def message_generator(events: list[dict]) -> list[str]:
     """
         Generates a string meant to be sendt to end-clients.
+        Fokuserer på 3 nøkkelord i root:
+            - item["description"] -> str
+            - item["start"]       -> dict
+            - item["end"]         -> dict
+        NOTE:
+            Det er mange nøkkelord vi kan bruke... Dette krever lengere undersøkelse etter vi går live.
     """
-    pass
+    messages = list()
+    for item in events:
+        start = datetime.datetime.fromisoformat(item["start"])
+        end   = datetime.datetime.fromisoformat(item["end"])
+        top    = "date: {}\nStart: {} -> End: {}".format(start.date(),":".join(str(start.time()).split(":")[:2]),":".join(str(end.time()).split(":")[:2]))
+        middel = item["description"]
+        end    = ""
+
+        messages.append("--------------".join([top,middel,end]))
+
+    return messages
 
 
 
