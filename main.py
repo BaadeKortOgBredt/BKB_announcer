@@ -110,9 +110,9 @@ def send_to_discord(events: list[dict]) -> Exception | None:
         [^1] kommende uke er 7 dager etter den dagen hvor programmet hentet eventer.
     """
     
-    if "discord_client" not in globals():
+    if "discord_announcment_client" not in globals():
         print("Client has not been inisiated")
-        return NameError("func 'send_to_discord': 'discord_client' does not exist.")
+        return NameError("func 'send_to_discord': 'discord_announcment_client' does not exist.")
     # lim inn kode for å sende en str til "annonser", pass på formatering og at det er på riktig kanal
     # IKKE RAISE ERROR! Programmet må kjøre kontinuelig heletiden. Heller returner en Error isteded.
     pass
@@ -131,7 +131,7 @@ def message_generator(events: list[dict]) -> list[str]:
             Det er mange nøkkelord vi kan bruke... Dette krever lengere undersøkelse etter vi går live.
     """
     messages = list()
-    for item in events:
+    for item in events: # is going to be replaced by a "standard" function so we can have fledxible text generation 
         start = datetime.datetime.fromisoformat(item["start"])
         end   = datetime.datetime.fromisoformat(item["end"])
         top    = "date: {}\nStart: {} -> End: {}".format(start.date(),":".join(str(start.time()).split(":")[:2]),":".join(str(end.time()).split(":")[:2]))
@@ -148,13 +148,16 @@ def create_contact() -> Exception | None:
     """
         Creates the nessesary connections to services.
         services:
-            - Google calendar API
+            - Google calendar API (håndter et annet sted, se "Get_2w_google_api()" )
             - Facebook Graph API (muligens trenger ikke?)
             - Discord API
     """
-    global discord_client, facebook_client, google_calendar_client
+    global discord_announcment_client, facebook_client
 
-    discord_client, facebook_client, google_calendar_client = discord.Client(), "", build('calendar', 'v3', credentials=creds)
+    discord_announcment_client = discord.Client().get_guild(BKB_SERVER_ID).get_channel(BKB_ANNOUNCMENT_CHANNEL_ID)
+    facebook_client = ""
+
+    return None
 
 def time_diff(date1: datetime.datetime, date2: datetime.datetime) -> Exception | datetime.timedelta:
     diff = date2 - date1
