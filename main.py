@@ -6,7 +6,6 @@ TODO:
     [ ] create "calendar-to-post" pipeline
 """
 
-
 from __future__ import print_function
 
 import datetime
@@ -84,16 +83,13 @@ def Get_2w_google_api():
         return None
 
 def send_to_facebook(events: list[dict]) -> Exception | None:
-    if "facebook_client" not in globals():
-        print("Client has not been inisiated")
-        return NameError("func 'send_to_facebook': 'facebook_client' does not exist.")
 
-    page_id_1 = 123456789 # wrong id, need to find right one
-    facebook_access_token_1 = 'paste-your-page-access-token-here' # wrong token, need to find right one
+    page_id_1 = BKB_FACEBOOK_PAGE_ID
+    facebook_access_token_1 = BKB_FACEBOOK_PAGE_TOKEN 
     
     msg: list[str] = message_generator(events=events)
 
-    post_url = 'https://graph.facebook.com/{}/feed'.format(page_id_1)
+    post_url = 'https://graph.facebook.com/{}/feed'.format(page_id_1) # Figure out if correct link.
     payload = {
     'message': msg,
     'access_token': facebook_access_token_1
@@ -103,7 +99,7 @@ def send_to_facebook(events: list[dict]) -> Exception | None:
 
     return None
 
-def send_to_discord(events: list[dict]) -> Exception | None:
+async def send_to_discord(events: list[dict]) -> list[Exception]:
     """
         events er en dictonary med alle relevante envents for den kommende uke[^1]
 
@@ -115,12 +111,21 @@ def send_to_discord(events: list[dict]) -> Exception | None:
         return NameError("func 'send_to_discord': 'discord_announcment_client' does not exist.")
     # lim inn kode for å sende en str til "annonser", pass på formatering og at det er på riktig kanal
     # IKKE RAISE ERROR! Programmet må kjøre kontinuelig heletiden. Heller returner en Error isteded.
-    pass
+    ret_messages = list()
+    for event in message_generator(events):
+        try:
+            await discord_announcment_client.send(event)
+        except Exception as err:
+            ret_messages.append(err)
+    
+    return ret_messages
+
+
 
 def main():
     pass
 
-def message_generator(events: list[dict]) -> list[str]:
+def message_generator(events: dict) -> list[str]:
     """
         Generates a string meant to be sendt to end-clients.
         Fokuserer på 3 nøkkelord i root:
